@@ -155,6 +155,7 @@ def update_product(
 @app.delete(
     "/products/{id}",
     status_code=status.HTTP_204_NO_CONTENT,
+    response_model=None,
     tags=["Products"],
     summary="Delete product",
     description="Delete the product with the given id.",
@@ -162,7 +163,15 @@ def update_product(
 def delete_product(
     id: UUID = Path(..., description="Product id (UUID)."),
 ) -> None:
-    """Delete a product."""
+    """Delete a product.
+
+    Notes:
+        This endpoint intentionally returns *no content* (HTTP 204). We set
+        `response_model=None` to prevent FastAPI from inferring a response model
+        from the return annotation under postponed evaluation of annotations
+        (`from __future__ import annotations`), which would otherwise cause an
+        assertion error at startup for 204 responses.
+    """
     if id not in _PRODUCTS:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product not found")
     del _PRODUCTS[id]
